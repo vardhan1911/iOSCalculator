@@ -14,6 +14,8 @@ class ViewController: UIViewController {
     
     var userInTheMiddleOfTypingANumber: Bool = false
     
+    var brain = CalculatorBrain()
+    
     @IBAction func appendDigit(sender: UIButton) {
         let digit = sender.currentTitle! // Program will crash if .currentTitle is NIL
         
@@ -29,48 +31,28 @@ class ViewController: UIViewController {
     
     
     @IBAction func operate(sender: UIButton) {
-        let operation = sender.currentTitle!
+       // let operation = sender.currentTitle!
         if userInTheMiddleOfTypingANumber {
             enter()
         }
         
-        switch operation {
-        case "×": performOperation { $0 * $1 }
-        case "÷": performOperation { $1 / $0 }
-        case "+": performOperation { $0 + $1 }
-        case "−": performOperation { $1 - $0 }
-        case "√": performOperation { sqrt($0) }
-        default: break
-        }
-    }
-    
-    func performOperation(operation: (Double, Double) -> Double) {
-        if operandStack.count >= 2 {
-            displayValue = operation(operandStack.removeLast(), operandStack.removeLast())
-            enter()
+        if let operation = sender.currentTitle {
+            if let result = brain.performOperation(operation) {
+                displayValue = result
+            } else {
+                displayValue = 0
+            }
         }
     }
 
-    func performOperation(operation: (Double) -> Double) {
-        if operandStack.count >= 1 {
-            displayValue = operation(operandStack.removeLast())
-            enter()
-        }
-    }
-
-    func multiply(op1: Double, op2: Double) -> Double {
-        return op1 * op2
-    }
-    
-    var operandStack = Array<Double>()
     @IBAction func enter() {
         // Put userInMiddle.. to 'false'
         userInTheMiddleOfTypingANumber = false
-
-        // Put number from display to internal stack
-        operandStack.append(displayValue)
-        
-        println("operandStack = \(operandStack)")
+        if let result = brain.pushOperand(displayValue) {
+            displayValue = result
+        } else {
+            displayValue = 0
+        }
     }
     
     // Mirror for display label
